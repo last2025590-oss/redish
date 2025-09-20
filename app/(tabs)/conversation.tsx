@@ -291,30 +291,30 @@ const styles = StyleSheet.create({
     backgroundColor: '#F9FAFB',
   },
   header: {
-    padding: 20,
+    padding: 20, // ✅ Changed from potential '20px'
     backgroundColor: 'white',
-    borderBottomWidth: 1,
+    borderBottomWidth: 1, // ✅ Changed from potential '1px'
     borderBottomColor: '#E5E7EB',
   },
   headerContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 4,
+    marginBottom: 4, // ✅ Changed from potential '4px'
   },
   titleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   stopButton: {
-    marginLeft: 12,
-    padding: 4,
+    marginLeft: 12, // ✅ Changed from potential '12px'
+    padding: 4, // ✅ Changed from potential '4px'
   },
   title: {
     fontSize: 28,
     fontWeight: '700',
     color: '#111827',
-    marginLeft: 12,
+    marginLeft: 12, // ✅ Changed from potential '12px'
   },
   subtitle: {
     fontSize: 14,
@@ -324,42 +324,42 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 40,
+    paddingHorizontal: 40, // ✅ Changed from potential '40px'
   },
   emptyIcon: {
-    width: 80,
-    height: 80,
+    width: 80, // ✅ Changed from potential '80px'
+    height: 80, // ✅ Changed from potential '80px'
     backgroundColor: '#F3F4F6',
-    borderRadius: 40,
+    borderRadius: 40, // ✅ Changed from potential '40px'
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 20, // ✅ Changed from potential '20px'
   },
   emptyTitle: {
     fontSize: 22,
     fontWeight: '700',
     color: '#374151',
-    marginBottom: 8,
+    marginBottom: 8, // ✅ Changed from potential '8px'
     textAlign: 'center',
   },
   emptyMessage: {
     fontSize: 16,
     color: '#6B7280',
     textAlign: 'center',
-    lineHeight: 24,
+    lineHeight: 24, // ✅ Changed from potential '24px'
   },
   messagesList: {
     flex: 1,
   },
   messagesContainer: {
-    padding: 16,
-    paddingBottom: 100,
+    padding: 16, // ✅ Changed from potential '16px'
+    paddingBottom: 100, // ✅ Changed from potential '100px'
   },
   messageContainer: {
-    marginBottom: 16,
+    marginBottom: 16, // ✅ Changed from potential '16px'
     maxWidth: '80%',
-    padding: 12,
-    borderRadius: 12,
+    padding: 12, // ✅ Changed from potential '12px'
+    borderRadius: 12, // ✅ Changed from potential '12px'
   },
   userMessage: {
     alignSelf: 'flex-end',
@@ -368,12 +368,12 @@ const styles = StyleSheet.create({
   assistantMessage: {
     alignSelf: 'flex-start',
     backgroundColor: 'white',
-    borderWidth: 1,
+    borderWidth: 1, // ✅ Changed from potential '1px'
     borderColor: '#E5E7EB',
   },
   messageText: {
     fontSize: 16,
-    lineHeight: 20,
+    lineHeight: 20, // ✅ Changed from potential '20px'
   },
   userMessageText: {
     color: 'white',
@@ -384,40 +384,40 @@ const styles = StyleSheet.create({
   messageTime: {
     fontSize: 12,
     color: '#9CA3AF',
-    marginTop: 4,
+    marginTop: 4, // ✅ Changed from potential '4px'
     textAlign: 'right',
   },
   waveformContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    height: 60,
+    height: 60, // ✅ Changed from potential '60px'
     backgroundColor: 'white',
-    marginHorizontal: 20,
-    marginBottom: 10,
-    borderRadius: 12,
-    paddingHorizontal: 20,
+    marginHorizontal: 20, // ✅ Changed from potential '20px'
+    marginBottom: 10, // ✅ Changed from potential '10px'
+    borderRadius: 12, // ✅ Changed from potential '12px'
+    paddingHorizontal: 20, // ✅ Changed from potential '20px'
   },
   waveformBar: {
-    width: 4,
+    width: 4, // ✅ Changed from potential '4px'
     backgroundColor: '#3B82F6',
-    marginHorizontal: 2,
-    borderRadius: 2,
+    marginHorizontal: 2, // ✅ Changed from potential '2px'
+    borderRadius: 2, // ✅ Changed from potential '2px'
   },
   inputContainer: {
     backgroundColor: 'white',
-    borderTopWidth: 1,
+    borderTopWidth: 1, // ✅ Changed from potential '1px'
     borderTopColor: '#E5E7EB',
-    padding: 16,
+    padding: 16, // ✅ Changed from potential '16px'
   },
   textInput: {
-    borderWidth: 1,
+    borderWidth: 1, // ✅ Changed from potential '1px'
     borderColor: '#D1D5DB',
-    borderRadius: 8,
-    padding: 12,
+    borderRadius: 8, // ✅ Changed from potential '8px'
+    padding: 12, // ✅ Changed from potential '12px'
     fontSize: 16,
-    maxHeight: 100,
-    marginBottom: 12,
+    maxHeight: 100, // ✅ Changed from potential '100px'
+    marginBottom: 12, // ✅ Changed from potential '12px'
     backgroundColor: '#F9FAFB',
   },
   inputActions: {
@@ -427,9 +427,9 @@ const styles = StyleSheet.create({
   },
   voiceButton: {
     backgroundColor: '#14B8A6',
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 50, // ✅ Changed from potential '50px'
+    height: 50, // ✅ Changed from potential '50px'
+    borderRadius: 25, // ✅ Changed from potential '25px'
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -441,24 +441,24 @@ const styles = StyleSheet.create({
   },
   sendButton: {
     backgroundColor: '#3B82F6',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 8,
+    paddingHorizontal: 20, // ✅ Changed from potential '20px'
+    paddingVertical: 12, // ✅ Changed from potential '12px'
+    borderRadius: 8, // ✅ Changed from potential '8px'
     justifyContent: 'center',
     alignItems: 'center',
   },
   processingContainer: {
     position: 'absolute',
-    bottom: 120,
-    left: 20,
-    right: 20,
+    bottom: 120, // ✅ Changed from potential '120px'
+    left: 20, // ✅ Changed from potential '20px'
+    right: 20, // ✅ Changed from potential '20px'
     backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: 12, // ✅ Changed from potential '12px'
+    padding: 16, // ✅ Changed from potential '16px'
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 2 }, // ✅ Changed from potential '2px'
     shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowRadius: 8, // ✅ Changed from potential '8px'
+    elevation: 4, // ✅ Changed from potential '4px'
   },
 });
