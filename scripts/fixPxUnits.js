@@ -30,7 +30,10 @@ function fixPxUnits(directory) {
         let content = fs.readFileSync(file, 'utf8');
         const originalContent = content;
         
-        // Replace all "px" values with numbers (but avoid changing comments and strings)
+        // Count px units before replacement
+        const pxMatches = content.match(pxRegex) || [];
+        
+        // Replace px units but preserve comments and strings
         content = content.replace(pxRegex, (match, number) => {
           // Don't replace px in commented code or strings
           if (isInCommentOrString(content, match)) {
@@ -40,12 +43,11 @@ function fixPxUnits(directory) {
         });
         
         if (content !== originalContent) {
-          const fixes = (content.match(/\d+/g) || []).length - (originalContent.match(/\d+/g) || []).length;
-          totalFixes += fixes;
+          totalFixes += pxMatches.length;
           filesFixed++;
           
           fs.writeFileSync(file, content, 'utf8');
-          console.log(colorText(`✅ Fixed ${fixes} px units in: ${path.relative(process.cwd(), file)}`, 'green'));
+          console.log(colorText(`✅ Fixed ${pxMatches.length} px units in: ${path.relative(process.cwd(), file)}`, 'green'));
         }
       } catch (error) {
         console.log(colorText(`❌ Error processing file: ${file}`, 'red'));
@@ -58,31 +60,41 @@ function fixPxUnits(directory) {
 }
 
 function isInCommentOrString(content, match) {
-  // Simple check - if the px is preceded by // or /* or within quotes
   const index = content.indexOf(match);
+  if (index === -1) return false;
+  
   const precedingText = content.substring(0, index);
   
-  // Check if it's in a single line comment
-  if (precedingText.includes('//')) {
-    const lines = precedingText.split('\n');
-    const lastLine = lines[lines.length - 1];
-    if (lastLine.includes('//')) {
-      return true;
-    }
-  }
-  
-  // Check if it's in a multi-line comment
-  if (precedingText.includes('/*') && !precedingText.includes('*/')) {
+  // Check for single line comments (//)
+  const lastLine = precedingText.split('\n').pop();
+  if (lastLine.includes('//')) {
     return true;
   }
   
-  // Check if it's in a string (simple check)
+  // Check for multi-line comments (/* ... */)
+  const lastMultiLineCommentStart = precedingText.lastIndexOf('/*');
+  const lastMultiLineCommentEnd = precedingText.lastIndexOf('*/');
+  
+  if (lastMultiLineCommentStart > lastMultiLineCommentEnd) {
+    return true; // Inside a multi-line comment
+  }
+  
+  // Check for template literals (`...`)
+  const backticks = (precedingText.match(/`/g) || []).length;
+  if (backticks % 2 !== 0) {
+    return true; // Inside template literal
+  }
+  
+  // Check for single quotes
   const singleQuotes = (precedingText.match(/'/g) || []).length;
-  const doubleQuotes = (precedingText.match(/"/g) || []).length;
+  if (singleQuotes % 2 !== 0) {
+    return true; // Inside single quotes
+  }
   
-  // If odd number of quotes, we're inside a string
-  if (singleQuotes % 2 !== 0 || doubleQuotes % 2 !== 0) {
-    return true;
+  // Check for double quotes
+  const doubleQuotes = (precedingText.match(/"/g) || []).length;
+  if (doubleQuotes % 2 !== 0) {
+    return true; // Inside double quotes
   }
   
   return false;
@@ -104,12 +116,15 @@ function getAllFiles(dir) {
       
       // Skip node_modules and other directories we don't want to scan
       if (item.isDirectory()) {
-        if (item.name === 'node_modules' || item.name === '.git' || item.name === '.expo') {
+        if (item.name === 'node_modules' || item.name === '.git' || item.name === '.expo' || item.name === '.next') {
           continue;
         }
         files.push(...getAllFiles(fullPath));
       } else {
-        files.push(fullPath);
+        // Only process React/TypeScript files
+        if (item.name.endsWith('.js') || item.name.endsWith('.jsx') || item.name.endsWith('.ts') || item.name.endsWith('.tsx')) {
+          files.push(fullPath);
+        }
       }
     }
   } catch (error) {
@@ -124,12 +139,25 @@ function getAllFiles(dir) {
 console.log(colorText('🚀 Starting px unit fix script...', 'blue'));
 console.log(colorText('📁 Scanning app and components directories', 'blue'));
 
-const appResult = fixPxUnits('./app');
-const componentsResult = fixPxUnits('./components');
+const directories = ['./app', './components', './src', './lib'];
+let totalFixes = 0;
+let totalFilesFixed = 0;
+
+directories.forEach(dir => {
+  if (fs.existsSync(dir)) {
+    const result = fixPxUnits(dir);
+    totalFixes += result.totalFixes;
+    totalFilesFixed += result.filesFixed;
+  }
+});
 
 console.log('\n' + colorText('📊 Fix Results:', 'blue'));
-console.log(colorText(`   Files fixed: ${appResult.filesFixed + componentsResult.filesFixed}`, 'green'));
-console.log(colorText(`   Total px units removed: ${appResult.totalFixes + componentsResult.totalFixes}`, 'green'));
+console.log(colorText(`   Files fixed: ${totalFilesFixed}`, 'green'));
+console.log(colorText(`   Total px units removed: ${totalFixes}`, 'green'));
 
-console.log(colorText('\n🎉 All px units have been fixed!', 'green'));
-console.log(colorText('💡 Remember to restart your Metro bundler: npm start -- --reset-cache', 'yellow'));
+if (totalFixes > 0) {
+  console.log(colorText('\n🎉 All px units have been fixed!', 'green'));
+  console.log(colorText('💡 Remember to restart your Metro bundler: npm start -- --reset-cache', 'yellow'));
+} else {
+  console.log(colorText('\n✅ No px units found to fix!', 'green'));
+}
