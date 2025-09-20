@@ -16,7 +16,7 @@ import { AuthForm } from '@/components/AuthForm';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { ConversationService } from '@/lib/conversation';
 import { ConversationMessage, ConversationState } from '@/lib/types';
-import { Mic, MicOff, Send, Trash2, Volume2, VolumeX } from 'lucide-react-native';
+import { Mic, MicOff, Send, Trash2, Volume2, VolumeX, MessageCircle } from 'lucide-react-native';
 
 export default function ConversationScreen() {
   const { user, loading: authLoading } = useAuth();
