@@ -19,6 +19,7 @@ interface RedditPostCardProps {
   showSaveButton?: boolean;
   isSaved?: boolean;
   onStartConversation?: (post: RedditPost) => void;
+  onOpenUrl?: (url: string) => void;
 }
 
 export function RedditPostCard({ 
@@ -26,7 +27,8 @@ export function RedditPostCard({
   onSave, 
   showSaveButton = true,
   isSaved = false,
-  onStartConversation 
+  onStartConversation,
+  onOpenUrl
 }: RedditPostCardProps) {
   const [isPlaying, setIsPlaying] = React.useState(false);
   const [localIsSaved, setLocalIsSaved] = React.useState(isSaved);
@@ -72,8 +74,11 @@ export function RedditPostCard({
   };
 
   const openRedditUrl = () => {
-    // In a real app, you would use Linking.openURL(post.reddit_url)
-    Alert.alert('Open Reddit', `Would open: ${post.reddit_url}`);
+    if (onOpenUrl) {
+      onOpenUrl(post.reddit_url);
+    } else {
+      Alert.alert('Open Reddit', `Would open: ${post.reddit_url}`);
+    }
   };
 
   return (
@@ -82,28 +87,33 @@ export function RedditPostCard({
         <Text style={styles.title} numberOfLines={2}>
           {post.title}
         </Text>
-        <TouchableOpacity
-          style={styles.linkButton}
-          onPress={openRedditUrl}
-        >
-          <ExternalLink size={20} color="#6B7280" />
-        </TouchableOpacity>
       </View>
 
-      <Text style={styles.summary} numberOfLines={4}>
+      <TouchableOpacity
+        style={styles.urlContainer}
+        onPress={openRedditUrl}
+        activeOpacity={0.7}
+      >
+        <ExternalLink size={14} color="#3B82F6" />
+        <Text style={styles.urlText} numberOfLines={1}>
+          {post.reddit_url.replace('https://www.reddit.com', 'reddit.com')}
+        </Text>
+      </TouchableOpacity>
+
+      <Text style={styles.summary} numberOfLines={5}>
         {post.summary}
       </Text>
 
       <View style={styles.viewpointsContainer}>
-        <Text style={styles.viewpointsTitle}>Key Viewpoints:</Text>
+        <Text style={styles.viewpointsTitle}>💭 Key Community Viewpoints</Text>
         {post.viewpoints.slice(0, 2).map((viewpoint, index) => (
           <Text key={index} style={styles.viewpoint} numberOfLines={2}>
-            • {viewpoint}
+            {index === 0 ? '🔹' : '🔸'} {viewpoint}
           </Text>
         ))}
         {post.viewpoints.length > 2 && (
           <Text style={styles.moreViewpoints}>
-            +{post.viewpoints.length - 2} more viewpoints
+            ✨ +{post.viewpoints.length - 2} more perspectives in discussion
           </Text>
         )}
       </View>
@@ -120,7 +130,7 @@ export function RedditPostCard({
             <Play size={20} color="white" />
           )}
           <Text style={styles.playButtonText}>
-            {isPlaying ? 'Pause' : 'Listen'}
+            {isPlaying ? 'Playing...' : '🎧 Listen'}
           </Text>
         </TouchableOpacity>
 
@@ -130,31 +140,39 @@ export function RedditPostCard({
             onPress={() => onStartConversation(post)}
           >
             <MessageCircle size={16} color="white" />
-            <Text style={styles.conversationButtonText}>Chat</Text>
+            <Text style={styles.conversationButtonText}>💬 Chat</Text>
           </TouchableOpacity>
         )}
 
-        <TouchableOpacity style={styles.iconButton} onPress={handleShare}>
-          <ShareIcon size={20} color="#6B7280" />
-        </TouchableOpacity>
-
-        {showSaveButton && (
-          <TouchableOpacity 
-            style={[styles.iconButton, localIsSaved && styles.savedButton]} 
-            onPress={handleSave}
-            disabled={localIsSaved}
-          >
-            {localIsSaved ? (
-              <BookmarkCheck size={20} color="#10B981" />
-            ) : (
-              <Bookmark size={20} color="#6B7280" />
-            )}
+        <View style={styles.secondaryActions}>
+          <TouchableOpacity style={styles.iconButton} onPress={handleShare}>
+            <ShareIcon size={18} color="#6B7280" />
           </TouchableOpacity>
-        )}
+
+          {showSaveButton && (
+            <TouchableOpacity 
+              style={[styles.iconButton, localIsSaved && styles.savedButton]} 
+              onPress={handleSave}
+              disabled={localIsSaved}
+            >
+              {localIsSaved ? (
+                <BookmarkCheck size={18} color="#10B981" />
+              ) : (
+                <Bookmark size={18} color="#6B7280" />
+              )}
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
 
       <Text style={styles.timestamp}>
-        {new Date(post.created_at).toLocaleDateString()}
+        📅 {new Date(post.created_at).toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        })}
       </Text>
     </View>
   );
@@ -168,56 +186,71 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 4,
+    borderWidth: 1,
+    borderColor: '#F3F4F6',
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
     marginBottom: 12,
   },
   title: {
-    flex: 1,
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: 19,
+    fontWeight: '700',
     color: '#111827',
-    lineHeight: 24,
+    lineHeight: 26,
   },
-  linkButton: {
-    padding: 4,
-    marginLeft: 8,
+  urlContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F8FAFC',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 6,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  urlText: {
+    fontSize: 12,
+    color: '#3B82F6',
+    marginLeft: 6,
+    fontWeight: '500',
+    flex: 1,
   },
   summary: {
-    fontSize: 14,
+    fontSize: 15,
     color: '#4B5563',
-    lineHeight: 20,
+    lineHeight: 22,
     marginBottom: 16,
   },
   viewpointsContainer: {
     marginBottom: 16,
   },
   viewpointsTitle: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '600',
     color: '#374151',
     marginBottom: 8,
   },
   viewpoint: {
-    fontSize: 13,
+    fontSize: 14,
     color: '#6B7280',
-    lineHeight: 18,
+    lineHeight: 20,
     marginBottom: 4,
   },
   moreViewpoints: {
-    fontSize: 12,
-    color: '#9CA3AF',
+    fontSize: 13,
+    color: '#8B5CF6',
     fontStyle: 'italic',
     marginTop: 4,
+    fontWeight: '500',
   },
   actions: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: 12,
   },
   actionButton: {
@@ -225,11 +258,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 8,
-    borderRadius: 8,
-    marginRight: 8,
+    borderRadius: 20,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
   playButton: {
-    backgroundColor: '#3B82F6',
+    backgroundColor: '#4F46E5',
   },
   playButtonText: {
     color: 'white',
@@ -237,24 +274,33 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   conversationButton: {
-    backgroundColor: '#14B8A6',
+    backgroundColor: '#059669',
   },
   conversationButtonText: {
     color: 'white',
     fontWeight: '600',
     marginLeft: 6,
   },
+  secondaryActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   iconButton: {
-    padding: 8,
-    marginRight: 8,
-    borderRadius: 6,
+    padding: 10,
+    marginLeft: 8,
+    borderRadius: 20,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
   savedButton: {
-    backgroundColor: '#F0FDF4',
+    backgroundColor: '#ECFDF5',
+    borderColor: '#A7F3D0',
   },
   timestamp: {
-    fontSize: 12,
-    color: '#9CA3AF',
+    fontSize: 11,
+    color: '#6B7280',
     textAlign: 'right',
+    fontWeight: '500',
   },
 });

@@ -8,6 +8,7 @@ import {
   Alert,
   ScrollView,
   SafeAreaView,
+  Linking,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { RedditAPI } from '@/lib/reddit-api';
@@ -19,7 +20,7 @@ import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { AuthForm } from '@/components/AuthForm';
 import { RedditPost } from '@/lib/types';
 import { ConversationService } from '@/lib/conversation';
-import { Sparkles, TrendingUp, Clock } from 'lucide-react-native';
+import { Sparkles, TrendingUp, Clock, ExternalLink, CheckCircle } from 'lucide-react-native';
 
 export default function HomeScreen() {
   const { user, loading: authLoading } = useAuth();
@@ -30,6 +31,7 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const [processingStep, setProcessingStep] = useState('');
+  const [savedPostIds, setSavedPostIds] = useState<Set<string>>(new Set());
 
   if (authLoading) {
     return <LoadingSpinner message="Loading..." />;
@@ -83,6 +85,19 @@ export default function HomeScreen() {
 
   const handleSavePost = async (post: RedditPost) => {
     try {
+      // Check if post already exists
+      const { data: existingPost } = await supabase
+        .from('posts')
+        .select('id')
+        .eq('user_id', post.user_id)
+        .eq('reddit_url', post.reddit_url)
+        .single();
+
+      if (existingPost) {
+        Alert.alert('Already Saved', 'This post is already in your saved collection');
+        return;
+      }
+
       const { error } = await supabase
         .from('posts')
         .insert([{
@@ -96,9 +111,23 @@ export default function HomeScreen() {
       if (error) throw error;
 
       await incrementSavedPosts();
-      Alert.alert('Success', 'Post saved successfully!');
+      setSavedPostIds(prev => new Set(prev).add(post.reddit_url));
+      Alert.alert('Success', 'Post saved to your collection!');
     } catch (error) {
       Alert.alert('Error', 'Failed to save post');
+    }
+  };
+
+  const openRedditUrl = async (url: string) => {
+    try {
+      const supported = await Linking.canOpenURL(url);
+      if (supported) {
+        await Linking.openURL(url);
+      } else {
+        Alert.alert('Error', 'Cannot open this URL');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to open URL');
     }
   };
 
@@ -161,9 +190,11 @@ export default function HomeScreen() {
               post={currentPost} 
               onSave={handleSavePost}
               onStartConversation={handleStartConversation}
-              isSaved={false}
+              isSaved={savedPostIds.has(currentPost.reddit_url)}
+              onOpenUrl={openRedditUrl}
             />
             <TouchableOpacity style={styles.clearButton} onPress={clearCurrentPost}>
+              <TrendingUp size={16} color="#6B7280" />
               <Text style={styles.clearButtonText}>Clear & Analyze Another</Text>
             </TouchableOpacity>
           </View>
@@ -174,7 +205,6 @@ export default function HomeScreen() {
             <Clock size={20} color="#6B7280" />
             <Text style={styles.exampleTitle}>Try these example Reddit URLs:</Text>
           </View>
-          <Text style={styles.exampleTitle}>Try these example Reddit URLs:</Text>
           <TouchableOpacity 
             style={styles.exampleItem}
             onPress={() => handleExampleUrl(
@@ -291,15 +321,20 @@ const styles = StyleSheet.create({
   },
   clearButton: {
     backgroundColor: '#F3F4F6',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     padding: 12,
     borderRadius: 8,
-    alignItems: 'center',
     marginTop: 16,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
   },
   clearButtonText: {
     color: '#6B7280',
     fontSize: 14,
     fontWeight: '500',
+    marginLeft: 6,
   },
   exampleContainer: {
     margin: 20,

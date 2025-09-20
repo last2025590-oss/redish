@@ -95,29 +95,29 @@ export class TextToSpeechService {
   
   private static createPodcastScript(post: RedditPost): string {
     // Create a more engaging podcast-style script
-    const intro = `Welcome to your personalized Reddit digest. Today we're diving into an interesting discussion titled: ${post.title}.`;
+    const intro = `Welcome to your personalized Reddit digest. Today we're exploring a fascinating discussion from the Reddit community titled: ${post.title}.`;
     
-    const summary = `Let me break this down for you. ${post.summary}`;
+    const summary = `Here's what's happening in this thread. ${post.summary}`;
     
-    const viewpointsIntro = "Now, what makes this discussion particularly fascinating are the diverse viewpoints from the community.";
+    const viewpointsIntro = "What makes this discussion particularly engaging are the diverse perspectives from Reddit users.";
     
     const viewpointsContent = post.viewpoints
       .map((viewpoint, index) => {
         const transitions = [
-          "First, some users argue that",
-          "On the other hand, others believe that",
-          "Additionally, there's a perspective that",
-          "Another interesting take suggests that",
-          "Finally, some community members point out that"
+          "First, many Redditors argue that",
+          "However, others in the thread believe that",
+          "There's also a compelling perspective that",
+          "Another interesting viewpoint suggests that",
+          "Finally, some community members emphasize that"
         ];
         const transition = transitions[index] || "Another viewpoint suggests that";
         return `${transition} ${viewpoint.toLowerCase()}`;
       })
       .join('. ');
     
-    const outro = "That's a wrap on today's Reddit digest. These discussions show how complex and nuanced online conversations can be. Thanks for listening, and keep exploring!";
+    const outro = "That's your Reddit digest for this thread. These discussions showcase the depth and complexity of online community conversations. Keep exploring and stay curious!";
     
     // Add natural pauses for better flow
-    return [intro, summary, viewpointsIntro, viewpointsContent, outro].join('. ... ');
+    return [intro, summary, viewpointsIntro, viewpointsContent, outro].join('... ');
   }
 }

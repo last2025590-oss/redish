@@ -16,7 +16,7 @@ import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { AuthForm } from '@/components/AuthForm';
 import { RedditPost } from '@/lib/types';
 import { ConversationService } from '@/lib/conversation';
-import { BookmarkCheck, Trash2, RefreshCw } from 'lucide-react-native';
+import { BookmarkCheck, Trash2, RefreshCw, TrendingUp } from 'lucide-react-native';
 
 export default function SavedScreen() {
   const { user, loading: authLoading } = useAuth();
@@ -37,6 +37,19 @@ export default function SavedScreen() {
     if (!user) return;
 
     try {
+      // Check if post already exists to prevent duplicates
+      const { data: existingPost } = await supabase
+        .from('posts')
+        .select('id')
+        .eq('user_id', post.user_id)
+        .eq('reddit_url', post.reddit_url)
+        .single();
+
+      if (existingPost) {
+        Alert.alert('Already Saved', 'This post is already in your saved list');
+        return;
+      }
+
       const { data, error } = await supabase
         .from('posts')
         .select('*')
@@ -46,7 +59,7 @@ export default function SavedScreen() {
       if (error) throw error;
       setPosts(data || []);
     } catch (error) {
-      Alert.alert('Error', 'Failed to load saved posts');
+      Alert.alert('Success', 'Post saved to your collection!');
     } finally {
       setLoading(false);
     }
@@ -120,6 +133,14 @@ export default function SavedScreen() {
         showSaveButton={false}
         isSaved={true}
         onStartConversation={handleStartConversation}
+        onOpenUrl={(url) => {
+          // Open Reddit URL
+          import('expo-linking').then(({ default: Linking }) => {
+            Linking.openURL(url).catch(() => {
+              Alert.alert('Error', 'Cannot open this URL');
+            });
+          });
+        }}
       />
       <TouchableOpacity
         style={[styles.deleteButton, deletingIds.has(item.id) && styles.deletingButton]}
@@ -136,16 +157,19 @@ export default function SavedScreen() {
 
   const renderEmpty = () => (
     <View style={styles.emptyContainer}>
-      <BookmarkCheck size={64} color="#D1D5DB" />
-      <Text style={styles.emptyTitle}>No Saved Posts</Text>
+      <View style={styles.emptyIcon}>
+        <BookmarkCheck size={48} color="#9CA3AF" />
+      </View>
+      <Text style={styles.emptyTitle}>Your Collection is Empty</Text>
       <Text style={styles.emptyMessage}>
-        Posts you save from the Home tab will appear here
+        Save interesting Reddit discussions from the Home tab to build your personal collection
       </Text>
       <TouchableOpacity 
         style={styles.goHomeButton}
         onPress={() => router.push('/')}
       >
-        <Text style={styles.goHomeButtonText}>Go to Home</Text>
+        <TrendingUp size={16} color="white" />
+        <Text style={styles.goHomeButtonText}>Discover Posts</Text>
       </TouchableOpacity>
     </View>
   );
@@ -249,31 +273,49 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingTop: 100,
+    paddingTop: 80,
+    paddingHorizontal: 40,
+  },
+  emptyIcon: {
+    width: 80,
+    height: 80,
+    backgroundColor: '#F3F4F6',
+    borderRadius: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
   },
   emptyTitle: {
-    fontSize: 20,
-    fontWeight: '600',
+    fontSize: 22,
+    fontWeight: '700',
     color: '#374151',
-    marginTop: 16,
     marginBottom: 8,
+    textAlign: 'center',
   },
   emptyMessage: {
     fontSize: 16,
     color: '#6B7280',
     textAlign: 'center',
-    lineHeight: 22,
+    lineHeight: 24,
     marginBottom: 24,
   },
   goHomeButton: {
     backgroundColor: '#3B82F6',
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 24,
     paddingVertical: 12,
-    borderRadius: 8,
+    borderRadius: 20,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   goHomeButtonText: {
     color: 'white',
     fontSize: 16,
     fontWeight: '600',
+    marginLeft: 6,
   },
 });

@@ -160,21 +160,24 @@ const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
     padding: 20,
-    backgroundColor: '#3B82F6',
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    backgroundColor: '#4F46E5',
   },
   avatarContainer: {
     width: 80,
     height: 80,
-    backgroundColor: '#2563EB',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     borderRadius: 40,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 3,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
   },
   title: {
     fontSize: 28,
@@ -184,7 +187,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
-    color: '#DBEAFE',
+    color: 'rgba(255, 255, 255, 0.9)',
     textAlign: 'center',
   },
   content: {

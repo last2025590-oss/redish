@@ -193,7 +193,10 @@ export default function ConversationScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <View style={styles.headerContent}>
-          <Text style={styles.title}>AI Conversation</Text>
+          <View style={styles.titleContainer}>
+            <MessageCircle size={28} color="#3B82F6" />
+            <Text style={styles.title}>AI Chat</Text>
+          </View>
           <TouchableOpacity onPress={handleClearConversation}>
             <Trash2 size={24} color="#EF4444" />
           </TouchableOpacity>
@@ -205,18 +208,21 @@ export default function ConversationScreen() {
         </View>
         {conversationState.currentRedditPost ? (
           <Text style={styles.subtitle} numberOfLines={1}>
-            Discussing: {conversationState.currentRedditPost.title}
+            💬 Discussing: {conversationState.currentRedditPost.title}
           </Text>
         ) : (
-          <Text style={styles.subtitle}>Select a Reddit post to start chatting</Text>
+          <Text style={styles.subtitle}>🔍 Select a Reddit post to start chatting</Text>
         )}
       </View>
 
       {conversationState.messages.length === 0 && !conversationState.currentRedditPost ? (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyTitle}>No Active Conversation</Text>
+          <View style={styles.emptyIcon}>
+            <MessageCircle size={48} color="#9CA3AF" />
+          </View>
+          <Text style={styles.emptyTitle}>Ready to Chat!</Text>
           <Text style={styles.emptyMessage}>
-            Go to Home or Saved tabs and tap "Chat" on a Reddit post to start a conversation.
+            Go to Home or Saved tabs and tap the 💬 Chat button on any Reddit post to start an AI-powered conversation.
           </Text>
         </View>
       ) : (
@@ -296,6 +302,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 4,
   },
+  titleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   stopButton: {
     marginLeft: 12,
     padding: 4,
@@ -304,6 +314,7 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '700',
     color: '#111827',
+    marginLeft: 12,
   },
   subtitle: {
     fontSize: 14,
@@ -313,11 +324,20 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 40,
+    paddingHorizontal: 40,
+  },
+  emptyIcon: {
+    width: 80,
+    height: 80,
+    backgroundColor: '#F3F4F6',
+    borderRadius: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
   },
   emptyTitle: {
-    fontSize: 20,
-    fontWeight: '600',
+    fontSize: 22,
+    fontWeight: '700',
     color: '#374151',
     marginBottom: 8,
     textAlign: 'center',
@@ -326,7 +346,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#6B7280',
     textAlign: 'center',
-    lineHeight: 22,
+    lineHeight: 24,
   },
   messagesList: {
     flex: 1,
