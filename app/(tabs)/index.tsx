@@ -20,7 +20,7 @@ import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { AuthForm } from '@/components/AuthForm';
 import { RedditPost } from '@/lib/types';
 import { ConversationService } from '@/lib/conversation';
-import { Sparkles, TrendingUp, Clock, ExternalLink, CheckCircle } from 'lucide-react-native';
+import { Sparkles, TrendingUp, Clock, ExternalLink, CircleCheck as CheckCircle } from 'lucide-react-native';
 
 export default function HomeScreen() {
   const { user, loading: authLoading } = useAuth();
