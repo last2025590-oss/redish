@@ -160,7 +160,6 @@ const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
     padding: 20,
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     backgroundColor: '#4F46E5',
   },
   avatarContainer: {
