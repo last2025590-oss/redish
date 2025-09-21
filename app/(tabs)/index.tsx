@@ -31,8 +31,32 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const [processingStep, setProcessingStep] = useState('');
-  const [savedPostIds, setSavedPostIds] = useState<Set<string>>(new Set());
+  const [savedPostUrls, setSavedPostUrls] = useState<Set<string>>(new Set());
 
+  // Load saved posts URLs when user is available
+  useEffect(() => {
+    if (user) {
+      loadSavedPostUrls();
+    }
+  }, [user]);
+
+  const loadSavedPostUrls = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('posts')
+        .select('reddit_url')
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+      
+      const urls = new Set(data?.map(post => post.reddit_url) || []);
+      setSavedPostUrls(urls);
+    } catch (error) {
+      console.error('Error loading saved post URLs:', error);
+    }
+  };
   if (authLoading) {
     return <LoadingSpinner message="Loading..." />;
   }
@@ -111,9 +135,10 @@ export default function HomeScreen() {
       if (error) throw error;
 
       await incrementSavedPosts();
-      setSavedPostIds(prev => new Set(prev).add(post.reddit_url));
+      setSavedPostUrls(prev => new Set(prev).add(post.reddit_url));
       Alert.alert('Success', 'Post saved to your collection!');
     } catch (error) {
+      console.error('Error saving post:', error);
       Alert.alert('Error', 'Failed to save post');
     }
   };
@@ -190,7 +215,7 @@ export default function HomeScreen() {
               post={currentPost} 
               onSave={handleSavePost}
               onStartConversation={handleStartConversation}
-              isSaved={savedPostIds.has(currentPost.reddit_url)}
+              isSaved={savedPostUrls.has(currentPost.reddit_url)}
               onOpenUrl={openRedditUrl}
             />
             <TouchableOpacity style={styles.clearButton} onPress={clearCurrentPost}>

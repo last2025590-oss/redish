@@ -37,19 +37,6 @@ export default function SavedScreen() {
     if (!user) return;
 
     try {
-      // Check if post already exists to prevent duplicates
-      const { data: existingPost } = await supabase
-        .from('posts')
-        .select('id')
-        .eq('user_id', post.user_id)
-        .eq('reddit_url', post.reddit_url)
-        .single();
-
-      if (existingPost) {
-        Alert.alert('Already Saved', 'This post is already in your saved list');
-        return;
-      }
-
       const { data, error } = await supabase
         .from('posts')
         .select('*')
@@ -59,7 +46,8 @@ export default function SavedScreen() {
       if (error) throw error;
       setPosts(data || []);
     } catch (error) {
-      Alert.alert('Success', 'Post saved to your collection!');
+      console.error('Error loading saved posts:', error);
+      Alert.alert('Error', 'Failed to load saved posts');
     } finally {
       setLoading(false);
     }
@@ -135,10 +123,17 @@ export default function SavedScreen() {
         onStartConversation={handleStartConversation}
         onOpenUrl={(url) => {
           // Open Reddit URL
-          import('expo-linking').then(({ default: Linking }) => {
-            Linking.openURL(url).catch(() => {
-              Alert.alert('Error', 'Cannot open this URL');
-            });
+          import('expo-linking').then(async ({ default: Linking }) => {
+            try {
+              const supported = await Linking.canOpenURL(url);
+              if (supported) {
+                await Linking.openURL(url);
+              } else {
+                Alert.alert('Error', 'Cannot open this URL');
+              }
+            } catch (error) {
+              Alert.alert('Error', 'Failed to open URL');
+            }
           });
         }}
       />

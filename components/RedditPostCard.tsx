@@ -9,6 +9,7 @@ import {
   Platform,
 } from 'react-native';
 import * as Sharing from 'expo-sharing';
+import * as Linking from 'expo-linking';
 import { RedditPost } from '@/lib/types';
 import { TextToSpeechService } from '@/lib/text-to-speech';
 import { Play, Pause, Share as ShareIcon, Bookmark, BookmarkCheck, ExternalLink, MessageCircle } from 'lucide-react-native';
@@ -31,7 +32,12 @@ export function RedditPostCard({
   onOpenUrl
 }: RedditPostCardProps) {
   const [isPlaying, setIsPlaying] = React.useState(false);
-  const [localIsSaved, setLocalIsSaved] = React.useState(isSaved);
+  const [isProcessingSave, setIsProcessingSave] = React.useState(false);
+
+  // Update local state when prop changes
+  React.useEffect(() => {
+    setIsProcessingSave(false);
+  }, [isSaved]);
 
   const handlePlayPause = async () => {
     try {
@@ -53,22 +59,42 @@ export function RedditPostCard({
     try {
       const content = `Check out this Reddit post summary:\n\n${post.title}\n\n${post.summary}\n\nOriginal: ${post.reddit_url}`;
       
-      if (Platform.OS !== 'web' && await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(content);
+      if (Platform.OS === 'web') {
+        // Use Web Share API if available, otherwise fallback to clipboard
+        if (navigator.share) {
+          await navigator.share({
+            title: post.title,
+            text: content,
+            url: post.reddit_url,
+          });
+        } else {
+          // Fallback to copying to clipboard
+          await navigator.clipboard.writeText(content);
+          Alert.alert('Copied!', 'Post summary copied to clipboard');
+        }
       } else {
-        await Share.share({
-          message: content,
-          title: post.title,
-        });
+        // Use native sharing on mobile
+        if (await Sharing.isAvailableAsync()) {
+          await Sharing.shareAsync(content);
+        } else {
+          await Share.share({
+            message: content,
+            title: post.title,
+          });
+        }
       }
     } catch (error) {
-      Alert.alert('Error', 'Failed to share post');
+      console.error('Share error:', error);
+      // Don't show error for user cancellation
+      if (error.name !== 'AbortError') {
+        Alert.alert('Error', 'Failed to share post');
+      }
     }
   };
 
   const handleSave = () => {
     if (onSave) {
-      setLocalIsSaved(true);
+      setIsProcessingSave(true);
       onSave(post);
     }
   };
@@ -77,7 +103,10 @@ export function RedditPostCard({
     if (onOpenUrl) {
       onOpenUrl(post.reddit_url);
     } else {
-      Alert.alert('Open Reddit', `Would open: ${post.reddit_url}`);
+      // Fallback to direct linking
+      Linking.openURL(post.reddit_url).catch(() => {
+        Alert.alert('Error', 'Cannot open this URL');
+      });
     }
   };
 
@@ -151,12 +180,14 @@ export function RedditPostCard({
 
           {showSaveButton && (
             <TouchableOpacity 
-              style={[styles.iconButton, localIsSaved && styles.savedButton]} 
+              style={[styles.iconButton, isSaved && styles.savedButton]} 
               onPress={handleSave}
-              disabled={localIsSaved}
+              disabled={isSaved || isProcessingSave}
             >
-              {localIsSaved ? (
+              {isSaved ? (
                 <BookmarkCheck size={18} color="#10B981" />
+              ) : isProcessingSave ? (
+                <Bookmark size={18} color="#9CA3AF" />
               ) : (
                 <Bookmark size={18} color="#6B7280" />
               )}
